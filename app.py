@@ -68,8 +68,8 @@ if st.button("Process Video"):
 
 
 # Function to split transcript into smaller chunks
-def split_transcript(transcript, chunk_size=1000):
-    return [transcript[i:i + chunk_size] for i in range(0, len(transcript), chunk_size)]
+def split_transcript(transcript_, chunk_size=1000):
+    return [transcript[i:i + chunk_size] for i in range(0, len(transcript_), chunk_size)]
 
 
 # Store Transcript in Vector DB Section
