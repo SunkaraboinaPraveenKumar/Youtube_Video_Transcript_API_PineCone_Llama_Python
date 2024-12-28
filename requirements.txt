@@ -1,0 +1,10 @@
+streamlit
+python-dotenv
+langchain
+langchain-community
+langchain-groq
+youtube-transcript-api
+fpdf
+python-dotenv
+pinecone-client==5.0.1
+huggingface-hub==0.26.2
