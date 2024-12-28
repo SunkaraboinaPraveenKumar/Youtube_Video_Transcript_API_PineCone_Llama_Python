@@ -54,10 +54,13 @@ if st.button("Process Video"):
             st.write("Fetching video transcript...")
             loader = YoutubeLoader.from_youtube_url(video_url, add_video_info=False)
             docs = loader.load()
-            transcript = docs[0].page_content
-            st.session_state.transcript = transcript
-            st.success("Video transcript fetched successfully!")
-            st.text_area("Video Transcript", transcript, height=300)
+            if docs:
+                transcript = docs[0].page_content
+                st.session_state.transcript = transcript
+                st.success("Video transcript fetched successfully!")
+                st.text_area("Video Transcript", transcript, height=300)
+            else:
+                st.error("No transcript found for the video.")
         except Exception as e:
             st.error(f"Failed to process video: {e}")
     else:
