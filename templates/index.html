@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLAMA Video & Chat Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1 {
+            background: #6a4c93;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: #6a4c93;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        form, div, textarea, button {
+            max-width: 800px;
+            margin: 20px auto;
+            display: block;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: white;
+        }
+
+        form {
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        textarea {
+            width: calc(100% - 22px);
+            height: 80px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: none;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #6a4c93;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        button:hover {
+            background-color: #553377;
+        }
+
+        button.loading::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            width: 16px;
+            height: 16px;
+            margin-top: -8px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #transcript {
+            font-size: 1rem;
+            white-space: pre-wrap;
+            padding: 10px;
+            background-color: #f9f9f9;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+
+        #summary {
+            font-size: 1rem;
+            white-space: pre-wrap;
+            padding: 10px;
+            background-color: #f9f9f9;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+
+        #chatResponse {
+            font-size: 1rem;
+            white-space: pre-wrap;
+            padding: 10px;
+            background-color: #f9f9f9;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+
+        #chatContainer {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chatMessage {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .userMessage {
+            background-color: #e1e1f1;
+            align-self: flex-end;
+        }
+
+        .assistantMessage {
+            background-color: #f9f9f9;
+            align-self: flex-start;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            button {
+                font-size: 0.9rem;
+            }
+
+            textarea, input[type="text"] {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🦙 LLAMA 3.1 Video & Chat Assistant</h1>
+
+    <h2>🎥 YouTube Video Analysis</h2>
+    <form id="videoForm">
+        <label for="video_url">Enter YouTube Video URL:</label>
+        <input type="text" id="video_url" name="video_url" required>
+        <button type="submit">Process Video</button>
+    </form>
+    <div id="transcript"></div>
+
+    <h2>📚 Summarize Transcript</h2>
+    <button id="summarizeButton">Summarize Transcript</button>
+    <div id="summary"></div>
+
+    <h2>💬 Chat with LLAMA</h2>
+    <div id="chatContainer">
+        <div id="chatResponse"></div>
+        <textarea id="user_prompt" placeholder="Ask LLAMA..."></textarea>
+        <button id="chatButton">Ask</button>
+    </div>
+
+    <script>
+        document.getElementById('videoForm').onsubmit = async function (e) {
+            e.preventDefault();
+            const videoUrl = document.getElementById('video_url').value;
+            const response = await fetch('/process_video', {
+                method: 'POST',
+                body: new URLSearchParams({ video_url: videoUrl })
+            });
+            const data = await response.json();
+            if (data.transcript) {
+                document.getElementById('transcript').textContent = data.transcript;
+            }
+        };
+
+        document.getElementById('summarizeButton').onclick = async function () {
+            const button = document.getElementById('summarizeButton');
+            button.classList.add('loading');
+            const response = await fetch('/summarize_transcript', { method: 'POST' });
+            button.classList.remove('loading');
+            const data = await response.json();
+            if (data.summary) {
+                document.getElementById('summary').textContent = data.summary;
+            }
+        };
+
+        document.getElementById('chatButton').onclick = async function () {
+            const button = document.getElementById('chatButton');
+            button.classList.add('loading');
+            const userPrompt = document.getElementById('user_prompt').value;
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_prompt: userPrompt })
+            });
+            button.classList.remove('loading');
+            const data = await response.json();
+            if (data.assistant_response) {
+                const chatResponseDiv = document.getElementById('chatResponse');
+                const userMessage = document.createElement('div');
+                userMessage.className = 'chatMessage userMessage';
+                userMessage.textContent = userPrompt;
+
+                const assistantMessage = document.createElement('div');
+                assistantMessage.className = 'chatMessage assistantMessage';
+                assistantMessage.textContent = data.assistant_response;
+
+                chatResponseDiv.appendChild(userMessage);
+                chatResponseDiv.appendChild(assistantMessage);
+                chatResponseDiv.scrollTop = chatResponseDiv.scrollHeight;
+            }
+        };
+    </script>
+</body>
+</html>
